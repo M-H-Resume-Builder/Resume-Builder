@@ -1,0 +1,849 @@
+package application;
+
+import java.io.File;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+
+import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+
+public class resumePDFbuilder extends Application {
+
+	Scene scene;
+	Scene sceneHS;
+	Scene sceneCollege;
+	Scene sceneSkills;
+	Scene sceneWorkExperience1;
+	Scene sceneWorkExperience2;
+	Scene sceneWorkExperience3;
+	Scene sceneProjects1;
+	Scene sceneProjects2;
+	Scene sceneProjects3;
+	Scene sceneLeadership1;
+	Scene sceneLeadership2;
+	Scene sceneGenerate;
+
+	private String selectedMajorChoice;
+	private String selectedGradMonth;
+	private Integer selectedGradYear;
+	
+	@Override
+	public void start(Stage primaryStage) {
+
+		// all the Buttons!!!
+		Button continueWelcomeButton = new Button("Continue");
+		Button backCollegeButton = new Button("Back");
+		Button continueCollegeButton = new Button("Continue");
+		Button continueWorkExperience3Button = new Button("Continue");
+		Button backSkillsButton = new Button("Back");
+		Button continueSkillsButton = new Button("Continue");
+		Button generateButton = new Button("Generate PDF of Resume!");
+
+		// work experience buttons
+		Button add2ndWorkExperienceButton = new Button("Yes");
+		Button no2ndWorkExperienceButton = new Button("No");
+		Button add3rdWorkExperienceButton = new Button("Yes");
+		Button no3rdWorkExperienceButton = new Button("No");
+		Button backWorkExperience1Button = new Button("Back");
+		Button backWorkExperience2Button = new Button("Back");
+		Button backWorkExperience3Button = new Button("Back");
+		// project buttons
+		Button add2ndProjectButton = new Button("Yes");
+		Button no2ndProjectButton = new Button("No");
+		Button add3rdProjectButton = new Button("Yes");
+		Button no3rdProjectButton = new Button("No");
+		Button backProjectsButton1 = new Button("Back");
+		Button backProjectsButton2 = new Button("Back");
+		Button backProjectsButton3 = new Button("Back");
+		Button continueProjectsButton3 = new Button("Continue");
+		Button backGenerateButton = new Button("Back"); //on sceneGenerate
+		
+		continueWelcomeButton.setOnAction(e -> primaryStage.setScene(sceneCollege));
+		backCollegeButton.setOnAction(e -> primaryStage.setScene(scene));
+		continueCollegeButton.setOnAction(e -> primaryStage.setScene(sceneSkills));
+		backSkillsButton.setOnAction(e -> primaryStage.setScene(sceneCollege));
+		continueSkillsButton.setOnAction(e -> primaryStage.setScene(sceneWorkExperience1));
+		
+		// work experience buttons
+		add2ndWorkExperienceButton.setOnAction(e -> primaryStage.setScene(sceneWorkExperience2));
+		no2ndWorkExperienceButton.setOnAction(e -> primaryStage.setScene(sceneProjects1));
+		add3rdWorkExperienceButton.setOnAction(e -> primaryStage.setScene(sceneWorkExperience3));
+		no3rdWorkExperienceButton.setOnAction(e -> primaryStage.setScene(sceneProjects1));
+		backWorkExperience1Button.setOnAction(e -> primaryStage.setScene(sceneSkills));
+		backWorkExperience2Button.setOnAction(e -> primaryStage.setScene(sceneWorkExperience1));
+		backWorkExperience3Button.setOnAction(e -> primaryStage.setScene(sceneWorkExperience2));
+		continueWorkExperience3Button.setOnAction(e -> primaryStage.setScene(sceneProjects1));
+		// project buttons
+		add2ndProjectButton.setOnAction(e -> primaryStage.setScene(sceneProjects2));
+		no2ndProjectButton.setOnAction(e -> primaryStage.setScene(sceneGenerate));
+		add3rdProjectButton.setOnAction(e -> primaryStage.setScene(sceneProjects3));
+		no3rdProjectButton.setOnAction(e -> primaryStage.setScene(sceneGenerate));
+		continueProjectsButton3.setOnAction(e -> primaryStage.setScene(sceneGenerate));
+		backProjectsButton1.setOnAction(e -> primaryStage.setScene(sceneWorkExperience3));
+		backProjectsButton2.setOnAction(e -> primaryStage.setScene(sceneProjects1));
+		backProjectsButton3.setOnAction(e -> primaryStage.setScene(sceneProjects2));
+		backGenerateButton.setOnAction(e -> primaryStage.setScene(sceneProjects3));
+		
+		Label welcomeLabel = new Label("Welcome to our resume builder! Please enter your information below.");
+		Label nameLabel = new Label("Name:");
+		Label emailLabel = new Label("Email:");
+		Label phoneLabel = new Label("Phone number:");
+		Label locationLabel = new Label("Location (City, State):");
+		Label gradLabel = new Label("Expected graduation date:");
+		Label monthLabel = new Label("Month:");
+		Label yearLabel = new Label("Year:");
+		TextField nameField = new TextField();
+		TextField emailField = new TextField();
+		TextField phoneField = new TextField();
+		TextField locationField = new TextField();
+		
+		
+		// choicebox for grad month
+		ChoiceBox<String> gradMonthBox = new ChoiceBox<>();
+		gradMonthBox.getItems().addAll("January", "February", "March", "April", "May", "June", "July", "August",
+				"September", "October", "November", "December");
+		
+
+		// add change listener for choice box
+		gradMonthBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				// Store the selected value in a string variable
+				selectedGradMonth = newValue;
+			}
+		});
+		// choicebox for grad year
+				List<Integer> years = new ArrayList<>();
+				for (int year = 2000; year <= 2100; year++) {
+					years.add(year);
+				}
+				
+				ChoiceBox<Integer> yearChoiceBox = new ChoiceBox<>();
+				yearChoiceBox.getItems().addAll(years);
+				yearChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Integer>() {
+					@Override
+					public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+						// Store the selected value in a string variable
+						selectedGradYear = newValue;
+					}
+				});
+
+		
+		// Add components to grid pane
+		GridPane gridPane = new GridPane();
+		gridPane.setHgap(10);
+		gridPane.setVgap(10);
+		gridPane.setPadding(new Insets(20, 20, 20, 20));
+		gridPane.add(nameLabel, 0, 0);
+		gridPane.add(nameField, 1, 0);
+		gridPane.add(emailLabel, 0, 1);
+		gridPane.add(emailField, 1, 1);
+		gridPane.add(phoneLabel, 0, 2);
+		gridPane.add(phoneField, 1, 2);
+		gridPane.add(locationLabel, 0, 3);
+		gridPane.add(locationField, 1, 3);
+		gridPane.add(gradLabel, 0, 5);
+		gridPane.add(monthLabel, 1, 4);
+		gridPane.add(yearLabel, 2, 4);
+		gridPane.add(gradMonthBox, 1, 5);
+		gridPane.add(yearChoiceBox, 2, 5);
+		gridPane.add(continueWelcomeButton, 2, 6);
+
+		// Add components to VBox
+		VBox vbox = new VBox();
+		vbox.setSpacing(10);
+		vbox.setPadding(new Insets(100, 100, 100, 100));
+		vbox.getChildren().add(welcomeLabel);
+		vbox.getChildren().add(gridPane);
+
+		// Set scene and show stage
+		scene = new Scene(vbox);
+		primaryStage.setTitle("Resume Builder");
+		primaryStage.setScene(scene);
+		primaryStage.show();
+		// end of scene 1: welcome
+
+		// start of scene 2: college
+		Label labelCollege = new Label("College Information:");
+		Label collegeName = new Label("Name of College:");
+		Label collegeLocation = new Label("Location:");
+		Label gpaCollege = new Label("GPA:");
+		Label majorCollege = new Label("Major:");
+		Label relevantCourseworkCollege = new Label("Relevant Coursework:");
+		Label labelWIT = new Label("Wentworth Institute of Technology");
+		Label labelBoston = new Label("Boston, MA");
+
+		ChoiceBox<String> majorChoiceBox = new ChoiceBox<>();
+		majorChoiceBox.getItems().addAll("Computer Science", "Computer Networking", "Data Science",
+				"Applied Mathematics", "Cybersecurity", "Information Technology");
+
+		// add change listener for choice box
+		majorChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				// Store the selected value in a string variable
+				selectedMajorChoice = newValue;
+			}
+		});
+		TextField gpaCollegeField = new TextField();
+		TextField course1Field = new TextField();
+		TextField course2Field = new TextField();
+		TextField course3Field = new TextField();
+		TextField course4Field = new TextField();
+		TextField course5Field = new TextField();
+		TextField course6Field = new TextField();
+		TextField course7Field = new TextField();
+		TextField course8Field = new TextField();
+		
+
+		// gridpane for college information
+		GridPane gridpaneAcademicsCollege = new GridPane();
+		gridpaneAcademicsCollege.setHgap(10);
+		gridpaneAcademicsCollege.setVgap(10);
+		gridpaneAcademicsCollege.setPadding(new Insets(20, 20, 20, 20));
+		gridpaneAcademicsCollege.add(collegeName, 0, 0);
+		gridpaneAcademicsCollege.add(labelWIT, 1, 0);
+		gridpaneAcademicsCollege.add(collegeLocation, 0, 1);
+		gridpaneAcademicsCollege.add(labelBoston, 1, 1);
+		gridpaneAcademicsCollege.add(majorCollege, 0, 2);
+		gridpaneAcademicsCollege.add(majorChoiceBox, 1, 2);
+		gridpaneAcademicsCollege.add(gpaCollege, 0, 3);
+		gridpaneAcademicsCollege.add(gpaCollegeField, 1, 3);
+		gridpaneAcademicsCollege.add(relevantCourseworkCollege, 0, 4);
+		gridpaneAcademicsCollege.add(course1Field, 1, 4);
+		gridpaneAcademicsCollege.add(course2Field, 1, 5);
+		gridpaneAcademicsCollege.add(course3Field, 1, 6);
+		gridpaneAcademicsCollege.add(course4Field, 1, 7);
+		gridpaneAcademicsCollege.add(course5Field, 1, 8);
+		gridpaneAcademicsCollege.add(course6Field, 1, 9);
+		gridpaneAcademicsCollege.add(course7Field, 1, 10);
+		gridpaneAcademicsCollege.add(course8Field, 1, 11);
+		gridpaneAcademicsCollege.add(backCollegeButton, 0, 12);
+		gridpaneAcademicsCollege.add(continueCollegeButton, 1, 12);
+
+		VBox vboxCollege = new VBox();
+		vboxCollege.setSpacing(10);
+		vboxCollege.setPadding(new Insets(100, 100, 100, 100));
+		vboxCollege.getChildren().add(labelCollege);
+		vboxCollege.getChildren().add(gridpaneAcademicsCollege);
+
+		sceneCollege = new Scene(vboxCollege);
+		// end of college scene
+
+		// start of skills scene
+		Label skillsTitle = new Label("Skills (leave textfield blank if not applicable)");
+		Label programmingLanguagesLabel = new Label("Programming Languages:");
+		Label softwareLabel = new Label("Software:");
+		Label frameworksLabel = new Label("Frameworks:");
+		Label foreignLanguagesLabel = new Label("Foreign Languages:");
+		TextField programmingLanguagesField = new TextField();
+		TextField softwareField = new TextField();
+		TextField frameworksField = new TextField();
+		TextField foreignLanguagesField = new TextField();
+		// grid pane for skills!
+		GridPane gridpaneSkills = new GridPane();
+		gridpaneSkills.setHgap(10);
+		gridpaneSkills.setVgap(10);
+		gridpaneSkills.setPadding(new Insets(20, 20, 20, 20));
+		gridpaneSkills.add(programmingLanguagesLabel, 0, 0);
+		gridpaneSkills.add(programmingLanguagesField, 1, 0);
+		gridpaneSkills.add(softwareLabel, 0, 1);
+		gridpaneSkills.add(softwareField, 1, 1);
+		gridpaneSkills.add(frameworksLabel, 0, 2);
+		gridpaneSkills.add(frameworksField, 1, 2);
+		gridpaneSkills.add(foreignLanguagesLabel, 0, 3);
+		gridpaneSkills.add(foreignLanguagesField, 1, 3);
+		gridpaneSkills.add(backSkillsButton, 0, 4);
+		gridpaneSkills.add(continueSkillsButton, 1, 4);
+
+		VBox vboxSkills = new VBox();
+		vboxSkills.setSpacing(10);
+		vboxSkills.setPadding(new Insets(100, 100, 100, 100));
+		vboxSkills.getChildren().add(skillsTitle);
+		vboxSkills.getChildren().add(gridpaneSkills);
+
+		sceneSkills = new Scene(vboxSkills);
+
+		// past work experience - scene 4
+		// labels and textfields
+		Label workExperienceTitleLabel1 = new Label("Work Experience");
+		Label companyLabel1 = new Label("Company:");
+		Label locationCompanyLabel1 = new Label("Location (City, State)");
+		Label titleLabel1 = new Label("Job Title:");
+		Label timeOfEmploymentLabel1 = new Label("Dates of Employment (ex: August 2014 - June 2019):");
+		Label briefDescriptionLabel1 = new Label("Brief Description (max: 150 words):");
+		Label moreWorkExperienceLabel1 = new Label("Would you like to add more work experience?");
+		TextField companyField1 = new TextField();
+		TextField locationCompanyField1 = new TextField();
+		TextField titleField1 = new TextField();
+		TextField timeOfEmploymentField1 = new TextField();
+		TextArea briefDescriptionArea1 = new TextArea();
+		briefDescriptionArea1.setPrefWidth(200); // Set preferred width
+		briefDescriptionArea1.setPrefHeight(80); // Set preferred height
+
+		// grid pane for work experience!!!
+		GridPane gridpaneWorkExperience1 = new GridPane();
+		gridpaneWorkExperience1.setHgap(10);
+		gridpaneWorkExperience1.setVgap(10);
+		gridpaneWorkExperience1.setPadding(new Insets(20, 20, 20, 20));
+		gridpaneWorkExperience1.add(companyLabel1, 0, 0);
+		gridpaneWorkExperience1.add(companyField1, 1, 0);
+		gridpaneWorkExperience1.add(locationCompanyLabel1, 0, 1);
+		gridpaneWorkExperience1.add(locationCompanyField1, 1, 1);
+		gridpaneWorkExperience1.add(titleLabel1, 0, 2);
+		gridpaneWorkExperience1.add(titleField1, 1, 2);
+		gridpaneWorkExperience1.add(timeOfEmploymentLabel1, 0, 3);
+		gridpaneWorkExperience1.add(timeOfEmploymentField1, 1, 3);
+		gridpaneWorkExperience1.add(briefDescriptionLabel1, 0, 4);
+		gridpaneWorkExperience1.add(briefDescriptionArea1, 1, 4);
+		gridpaneWorkExperience1.add(moreWorkExperienceLabel1, 0, 5);
+		gridpaneWorkExperience1.add(add2ndWorkExperienceButton, 1, 5);
+		gridpaneWorkExperience1.add(no2ndWorkExperienceButton, 1, 6);
+		gridpaneWorkExperience1.add(backWorkExperience1Button, 0, 6);
+
+		VBox vboxWorkExperience1 = new VBox();
+		vboxWorkExperience1.setSpacing(10);
+		vboxWorkExperience1.setPadding(new Insets(100, 100, 100, 100));
+		vboxWorkExperience1.getChildren().add(workExperienceTitleLabel1);
+		vboxWorkExperience1.getChildren().add(gridpaneWorkExperience1);
+
+		sceneWorkExperience1 = new Scene(vboxWorkExperience1);
+		// end of work experience 1
+		// start of work experience 2
+		Label workExperienceTitleLabel2 = new Label("Work Experience");
+		Label companyLabel2 = new Label("Company:");
+		Label locationCompanyLabel2 = new Label("Location (City, State)");
+		Label titleLabel2 = new Label("Job Title:");
+		Label timeOfEmploymentLabel2 = new Label("Dates of Employment (ex: August 2014 - June 2019):");
+		Label briefDescriptionLabel2 = new Label("Brief Description: ");
+		Label moreWorkExperienceLabel2 = new Label("Would you like to add more work experience?");
+		TextField companyField2 = new TextField();
+		TextField locationCompanyField2 = new TextField();
+		TextField titleField2 = new TextField();
+		TextField timeOfEmploymentField2 = new TextField();
+		TextArea briefDescriptionArea2 = new TextArea();
+		briefDescriptionArea2.setPrefWidth(200); // Set preferred width
+		briefDescriptionArea2.setPrefHeight(80); // Set preferred height
+
+		// grid pane for work experience!!!
+		GridPane gridpaneWorkExperience2 = new GridPane();
+		gridpaneWorkExperience2.setHgap(10);
+		gridpaneWorkExperience2.setVgap(10);
+		gridpaneWorkExperience2.setPadding(new Insets(20, 20, 20, 20));
+		gridpaneWorkExperience2.add(companyLabel2, 0, 0);
+		gridpaneWorkExperience2.add(companyField2, 1, 0);
+		gridpaneWorkExperience2.add(locationCompanyLabel2, 0, 1);
+		gridpaneWorkExperience2.add(locationCompanyField2, 1, 1);
+		gridpaneWorkExperience2.add(titleLabel2, 0, 2);
+		gridpaneWorkExperience2.add(titleField2, 1, 2);
+		gridpaneWorkExperience2.add(timeOfEmploymentLabel2, 0, 3);
+		gridpaneWorkExperience2.add(timeOfEmploymentField2, 1, 3);
+		gridpaneWorkExperience2.add(briefDescriptionLabel2, 0, 4);
+		gridpaneWorkExperience2.add(briefDescriptionArea2, 1, 4);
+		gridpaneWorkExperience2.add(moreWorkExperienceLabel2, 0, 5);
+		gridpaneWorkExperience2.add(add3rdWorkExperienceButton, 1, 5);
+		gridpaneWorkExperience2.add(no3rdWorkExperienceButton, 1, 6);
+		gridpaneWorkExperience2.add(backWorkExperience2Button, 0, 6);
+
+		VBox vboxWorkExperience2 = new VBox();
+		vboxWorkExperience2.setSpacing(10);
+		vboxWorkExperience2.setPadding(new Insets(100, 100, 100, 100));
+		vboxWorkExperience2.getChildren().add(workExperienceTitleLabel2);
+		vboxWorkExperience2.getChildren().add(gridpaneWorkExperience2);
+
+		sceneWorkExperience2 = new Scene(vboxWorkExperience2);
+		// end of work experience 2
+		// start of work experience 3
+		Label workExperienceTitleLabel3 = new Label("Work Experience");
+		Label companyLabel3 = new Label("Company:");
+		Label locationCompanyLabel3 = new Label("Location (City, State)");
+		Label titleLabel3 = new Label("Job Title:");
+		Label briefDescriptionLabel3 = new Label("Brief Description: ");
+		Label timeOfEmploymentLabel3 = new Label("Date of Employment (ex: August 2014 - June 2019):");
+		TextField companyField3 = new TextField();
+		TextField locationCompanyField3 = new TextField();
+		TextField titleField3 = new TextField();
+		TextField timeOfEmploymentField3 = new TextField();
+		TextArea briefDescriptionArea3 = new TextArea();
+		briefDescriptionArea3.setPrefWidth(200); // Set preferred width
+		briefDescriptionArea3.setPrefHeight(80); // Set preferred height
+
+		// grid pane for work experience!!!
+		GridPane gridpaneWorkExperience3 = new GridPane();
+		gridpaneWorkExperience3.setHgap(10);
+		gridpaneWorkExperience3.setVgap(10);
+		gridpaneWorkExperience3.setPadding(new Insets(20, 20, 20, 20));
+		gridpaneWorkExperience3.add(companyLabel3, 0, 0);
+		gridpaneWorkExperience3.add(companyField3, 1, 0);
+		gridpaneWorkExperience3.add(locationCompanyLabel3, 0, 1);
+		gridpaneWorkExperience3.add(locationCompanyField3, 1, 1);
+		gridpaneWorkExperience3.add(titleLabel3, 0, 2);
+		gridpaneWorkExperience3.add(titleField3, 1, 2);
+		gridpaneWorkExperience3.add(timeOfEmploymentLabel3, 0, 3);
+		gridpaneWorkExperience3.add(timeOfEmploymentField3, 1, 3);
+		gridpaneWorkExperience3.add(briefDescriptionLabel3, 0, 4);
+		gridpaneWorkExperience3.add(briefDescriptionArea3, 1, 4);
+		gridpaneWorkExperience3.add(backWorkExperience3Button, 0, 5);
+		gridpaneWorkExperience3.add(continueWorkExperience3Button, 1, 5);
+
+		VBox vboxWorkExperience3 = new VBox();
+		vboxWorkExperience3.setSpacing(10);
+		vboxWorkExperience3.setPadding(new Insets(100, 100, 100, 100));
+		vboxWorkExperience3.getChildren().add(workExperienceTitleLabel3);
+		vboxWorkExperience3.getChildren().add(gridpaneWorkExperience3);
+
+		sceneWorkExperience3 = new Scene(vboxWorkExperience3);
+		// end of work experience 3
+
+		// start of scene 5: projects
+		// labels and textfields
+		Label projectsTitle1 = new Label("Projects");
+		Label projectNameLabel1 = new Label("Name of Project:");
+		Label projectDescriptionLabel1 = new Label("Brief Description:");
+		Label moreProjectLabel1 = new Label("Would you like to add another project?");
+		TextField projectNameField1 = new TextField();
+		TextArea projectDescriptionArea1 = new TextArea();
+		projectDescriptionArea1.setPrefWidth(200); // Set preferred width
+		projectDescriptionArea1.setPrefHeight(80);
+
+		GridPane gridpaneProjects1 = new GridPane();
+		gridpaneProjects1.setHgap(10);
+		gridpaneProjects1.setVgap(10);
+		gridpaneProjects1.setPadding(new Insets(20, 20, 20, 20));
+		gridpaneProjects1.add(projectNameLabel1, 0, 0);
+		gridpaneProjects1.add(projectNameField1, 1, 0);
+		gridpaneProjects1.add(projectDescriptionLabel1, 0, 1);
+		gridpaneProjects1.add(projectDescriptionArea1, 1, 1);
+		gridpaneProjects1.add(moreProjectLabel1, 0, 2);
+		gridpaneProjects1.add(add2ndProjectButton, 1, 2);
+		gridpaneProjects1.add(no2ndProjectButton, 1, 3);
+		gridpaneProjects1.add(backProjectsButton1, 0, 3);
+
+		VBox vboxProjects = new VBox();
+		vboxProjects.setSpacing(10);
+		vboxProjects.setPadding(new Insets(100, 100, 100, 100));
+		vboxProjects.getChildren().add(projectsTitle1);
+		vboxProjects.getChildren().add(gridpaneProjects1);
+
+		sceneProjects1 = new Scene(vboxProjects);
+		// end of project 1
+		// start of projects 2
+		// labels and textfields
+		Label projectsTitle2 = new Label("Projects");
+		Label projectNameLabel2 = new Label("Name of Project:");
+		Label projectDescriptionLabel2 = new Label("Brief Description:");
+		Label moreProjectLabel2 = new Label("Would you like to add another project?");
+		TextField projectNameField2 = new TextField();
+		TextArea projectDescriptionArea2 = new TextArea();
+		projectDescriptionArea2.setPrefWidth(200); // Set preferred width
+		projectDescriptionArea2.setPrefHeight(80);
+
+		GridPane gridpaneProjects2 = new GridPane();
+		gridpaneProjects2.setHgap(10);
+		gridpaneProjects2.setVgap(10);
+		gridpaneProjects2.setPadding(new Insets(20, 20, 20, 20));
+		gridpaneProjects2.add(projectNameLabel2, 0, 0);
+		gridpaneProjects2.add(projectNameField2, 1, 0);
+		gridpaneProjects2.add(projectDescriptionLabel2, 0, 1);
+		gridpaneProjects2.add(projectDescriptionArea2, 1, 1);
+		gridpaneProjects2.add(moreProjectLabel2, 0, 2);
+		gridpaneProjects2.add(add3rdProjectButton, 1, 2);
+		gridpaneProjects2.add(no3rdProjectButton, 1, 3);
+		gridpaneProjects2.add(backProjectsButton2, 0, 3);
+
+		VBox vboxProjects2 = new VBox();
+		vboxProjects2.setSpacing(10);
+		vboxProjects2.setPadding(new Insets(100, 100, 100, 100));
+		vboxProjects2.getChildren().add(projectsTitle2);
+		vboxProjects2.getChildren().add(gridpaneProjects2);
+
+		sceneProjects2 = new Scene(vboxProjects2);
+		// end of project 2
+		// start of project 3
+		Label projectsTitle3 = new Label("Projects");
+		Label projectNameLabel3 = new Label("Name of Project:");
+		Label projectDescriptionLabel3 = new Label("Brief Description:");
+		TextField projectNameField3 = new TextField();
+		TextArea projectDescriptionArea3 = new TextArea();
+		projectDescriptionArea3.setPrefWidth(200); // Set preferred width
+		projectDescriptionArea3.setPrefHeight(80);
+
+
+		GridPane gridpaneProjects3 = new GridPane();
+		gridpaneProjects3.setHgap(10);
+		gridpaneProjects3.setVgap(10);
+		gridpaneProjects3.setPadding(new Insets(20, 20, 20, 20));
+		gridpaneProjects3.add(projectNameLabel3, 0, 0);
+		gridpaneProjects3.add(projectNameField3, 1, 0);
+		gridpaneProjects3.add(projectDescriptionLabel3, 0, 1);
+		gridpaneProjects3.add(projectDescriptionArea3, 1, 1);
+		gridpaneProjects3.add(backProjectsButton3, 0, 2);
+		gridpaneProjects3.add(continueProjectsButton3, 1, 2);
+
+		VBox vboxProjects3 = new VBox();
+		vboxProjects3.setSpacing(10);
+		vboxProjects3.setPadding(new Insets(100, 100, 100, 100));
+		vboxProjects3.getChildren().add(projectsTitle3);
+		vboxProjects3.getChildren().add(gridpaneProjects3);
+
+		sceneProjects3 = new Scene(vboxProjects3);
+		//end of projects
+		//start of generate scene
+		GridPane gridpaneGenerate = new GridPane();
+		gridpaneGenerate.setHgap(10);
+		gridpaneGenerate.setVgap(10);
+		gridpaneGenerate.setPadding(new Insets(20, 20, 20, 20));
+		gridpaneGenerate.add(generateButton, 0, 0);
+		gridpaneGenerate.add(backGenerateButton, 0, 1);
+
+		VBox vboxGenerate = new VBox();
+		vboxGenerate.setSpacing(10);
+		vboxGenerate.setPadding(new Insets(100, 100, 100, 100));
+		vboxGenerate.getChildren().add(gridpaneGenerate);
+
+		sceneGenerate = new Scene(vboxGenerate);
+
+		// Add event handler to generate button
+		generateButton.setOnAction(event -> {
+			// Get user input
+
+			// scene 1
+			String namePDF = nameField.getText();
+			String emailPDF = emailField.getText();
+			String phonePDF = phoneField.getText();
+			String locationPDF = locationField.getText();
+
+			// scene 2: College
+			String gpaCollegePDF = gpaCollegeField.getText();
+			String course1 = course1Field.getText();
+			String course2 = course2Field.getText();
+			String course3 = course3Field.getText();
+			String course4 = course4Field.getText();
+			String course5 = course5Field.getText();
+			String course6 = course6Field.getText();
+			String course7 = course7Field.getText();
+			String course8 = course8Field.getText();
+			
+			
+	//		System.out.print(newCoursework);
+
+			// scene 3: Skills
+			String programmingLanguagesPDF = programmingLanguagesField.getText();
+			String softwarePDF = softwareField.getText();
+			String frameworksPDF = frameworksField.getText();
+			String foreignLanguagesPDF = foreignLanguagesField.getText();
+
+			// scene 4: work experience
+			String titlePDF1 = titleField1.getText();
+			String companyPDF1 = companyField1.getText();
+			String locationCompanyPDF1 = locationCompanyField1.getText();
+			String timeOfEmploymentPDF1 = timeOfEmploymentField1.getText();
+			String briefDescriptionExperiencePDF1 = briefDescriptionArea1.getText();
+
+			String titlePDF2 = titleField2.getText();
+			String companyPDF2 = companyField2.getText();
+			String locationCompanyPDF2 = locationCompanyField2.getText();
+			String timeOfEmploymentPDF2 = timeOfEmploymentField2.getText();
+			String briefDescriptionExperiencePDF2 = briefDescriptionArea2.getText();
+
+			String titlePDF3 = titleField3.getText();
+			String companyPDF3 = companyField3.getText();
+			String locationCompanyPDF3 = locationCompanyField3.getText();
+			String timeOfEmploymentPDF3 = timeOfEmploymentField3.getText();
+			String briefDescriptionExperiencePDF3 = briefDescriptionArea3.getText();
+
+			// scene 5: projects
+			String projectNamePDF1 = projectNameField1.getText();
+			String projectDescriptionPDF1 = projectDescriptionArea1.getText();
+			
+			String projectNamePDF2 = projectNameField2.getText();
+			String projectDescriptionPDF2 = projectDescriptionArea2.getText();
+
+			String projectNamePDF3 = projectNameField3.getText();
+			String projectDescriptionPDF3 = projectDescriptionArea3.getText();
+
+			PDDocument document = new PDDocument();
+			PDPage page = new PDPage(PDRectangle.A4);
+			document.addPage(page);
+
+			// Generate PDF
+			try {
+
+				// name + info
+				PDPageContentStream contentStream = new PDPageContentStream(document, page);
+				contentStream.beginText();
+				contentStream.setFont(PDType1Font.TIMES_ROMAN, 30);
+				contentStream.newLineAtOffset(40, 790);
+				contentStream.showText(namePDF);
+				contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+				
+				contentStream.newLineAtOffset(0, -25);
+				if (!emailPDF.isEmpty()) {
+					contentStream.showText(emailPDF + "  |  ");
+				}
+				if (!phonePDF.isEmpty()) {
+					contentStream.showText(phonePDF + "  |  ");
+				}
+				if (!locationPDF.isEmpty()) {
+					contentStream.showText(locationPDF);
+				}
+							
+				// education
+				contentStream.setFont(PDType1Font.TIMES_BOLD, 12);
+				contentStream.newLineAtOffset(0, -30);
+				contentStream.showText("EDUCATION");
+				contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+				contentStream.newLineAtOffset(0, -20);
+				contentStream.showText("Wentworth Institute of Technology (WIT) | Boston, MA | Expected Graduation: "
+						+ selectedGradMonth + " " + selectedGradYear);
+				contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+				contentStream.newLineAtOffset(0, -15);
+				contentStream.showText("Bachelor of Science in " + selectedMajorChoice);
+				contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+				contentStream.newLineAtOffset(0, -15);
+				contentStream.showText("GPA: " + gpaCollegePDF + "/4.0");
+				contentStream.setFont(PDType1Font.TIMES_ITALIC, 11);
+				contentStream.newLineAtOffset(0, -15);
+				contentStream.showText("Relevant Coursework: ");
+				if (!course1.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(course1);
+				}
+				if (!course2.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(", " + course2);
+				}
+				if (!course3.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(", " + course3);
+				}
+				if (!course4.isEmpty() && !course5.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(", " + course4 + ",");
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.newLineAtOffset(0, -15);
+					contentStream.showText(course5);
+				}
+				if (!course4.isEmpty() && course5.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(", " + course4);
+				}
+				if (!course6.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(", " + course6);
+				}
+				if (!course7.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(", " + course7);
+				}
+				if (!course8.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(", " + course8);
+				}
+				
+
+				
+				// skills
+			//	if (!programmingLanguagesPDF.isEmpty() && !softwarePDF.isEmpty() && !frameworksPDF.isEmpty()
+			//			&& !foreignLanguagesPDF.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_BOLD, 12);
+					contentStream.newLineAtOffset(0, -30);
+					contentStream.showText("SKILLS");
+			//	}
+				if (!programmingLanguagesPDF.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.newLineAtOffset(0, -20);
+					contentStream.showText("Programming Languages: " + programmingLanguagesPDF);
+				}
+				if (!softwarePDF.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.newLineAtOffset(0, -15);
+					contentStream.showText("Software: " + softwarePDF);
+				}
+				if (!frameworksPDF.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.newLineAtOffset(0, -15);
+					contentStream.showText("Frameworks: " + frameworksPDF);
+				}
+				if (!foreignLanguagesPDF.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.newLineAtOffset(0, -15);
+					contentStream.showText("Foreign Languages: " + foreignLanguagesPDF);
+				}
+
+				// work experience
+		//		if (!titlePDF1.isEmpty() && !companyPDF1.isEmpty() && !locationCompanyPDF1.isEmpty()
+			//			&& !timeOfEmploymentPDF1.isEmpty() && !briefDescriptionExperiencePDF1.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_BOLD, 12);
+					contentStream.newLineAtOffset(0, -30);
+					contentStream.showText("EXPERIENCE");
+			//	}
+				if (!titlePDF1.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_BOLD, 11);
+					contentStream.newLineAtOffset(0, -20);
+					contentStream.showText(titlePDF1 + "  |  ");
+				}
+				if (!companyPDF1.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(companyPDF1 + "  |  ");
+				}
+				if (!locationCompanyPDF1.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(locationCompanyPDF1 + "  |  ");
+				}
+				if (!timeOfEmploymentPDF1.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(timeOfEmploymentPDF1);
+				}
+				if (!briefDescriptionExperiencePDF1.isEmpty()) {
+					String[] linesExperience = briefDescriptionExperiencePDF1.split("\n");
+					for (String line : linesExperience) {
+						contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+						contentStream.newLineAtOffset(0, -15);
+						contentStream.showText("      -" + line);
+					}
+				}
+				// work experience 2
+				if (!titlePDF2.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_BOLD, 11);
+					contentStream.newLineAtOffset(0, -30);
+					contentStream.showText(titlePDF2 + "  |  ");
+				}
+				if (!companyPDF2.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(companyPDF2 + "  |  ");
+				}
+				if (!locationCompanyPDF2.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(locationCompanyPDF2 + "  |  ");
+				}
+				if (!timeOfEmploymentPDF2.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(timeOfEmploymentPDF2);
+				}
+				if (!briefDescriptionExperiencePDF2.isEmpty()) {
+					String[] linesExperience = briefDescriptionExperiencePDF2.split("\n");
+					for (String line : linesExperience) {
+						contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+						contentStream.newLineAtOffset(0, -15);
+						contentStream.showText("      -" + line);
+					}
+				}
+				// work experience 3
+				if (!titlePDF3.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_BOLD, 11);
+					contentStream.newLineAtOffset(0, -30);
+					contentStream.showText(titlePDF3 + "  |  ");
+				}
+				if (!companyPDF3.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(companyPDF3 + "  |  ");
+				}
+				if (!locationCompanyPDF3.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(locationCompanyPDF3 + "  |  ");
+				}
+				if (!timeOfEmploymentPDF3.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+					contentStream.showText(timeOfEmploymentPDF3);
+				}
+				if (!briefDescriptionExperiencePDF3.isEmpty()) {
+					String[] linesExperience = briefDescriptionExperiencePDF3.split("\n");
+					for (String line : linesExperience) {
+						contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+						contentStream.newLineAtOffset(0, -15);
+						contentStream.showText("      -" + line);
+					}
+				}				
+				// projects
+				if (!projectNamePDF1.isEmpty() && !projectDescriptionPDF1.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_BOLD, 12);
+					contentStream.newLineAtOffset(0, -30);
+					contentStream.showText("PROJECTS");
+				}
+				if (!projectNamePDF1.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_BOLD, 11);
+					contentStream.newLineAtOffset(0, -20);
+					contentStream.showText(projectNamePDF1);
+				}
+				if (!projectDescriptionPDF1.isEmpty()) {
+					String[] linesProjectDescription = projectDescriptionPDF1.split("\n");
+					for (String line : linesProjectDescription) {
+						contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+						contentStream.newLineAtOffset(0, -15);
+						contentStream.showText("      -" + line);
+					}
+				}
+				
+				// project 2
+				if (!projectNamePDF2.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_BOLD, 11);
+					contentStream.newLineAtOffset(0, -30);
+					contentStream.showText(projectNamePDF2);
+				}
+				if (!projectDescriptionPDF2.isEmpty()) {
+					String[] linesProjectDescription = projectDescriptionPDF2.split("\n");
+					for (String line : linesProjectDescription) {
+						contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+						contentStream.newLineAtOffset(0, -15);
+						contentStream.showText("      -" + line);
+					}
+				}
+				
+				// project 3
+				if (!projectNamePDF3.isEmpty()) {
+					contentStream.setFont(PDType1Font.TIMES_BOLD, 11);
+					contentStream.newLineAtOffset(0, -30);
+					contentStream.showText(projectNamePDF3);
+				}
+				if (!projectDescriptionPDF3.isEmpty()) {
+					String[] linesProjectDescription = projectDescriptionPDF3.split("\n");
+					for (String line : linesProjectDescription) {
+						contentStream.setFont(PDType1Font.TIMES_ROMAN, 11);
+						contentStream.newLineAtOffset(0, -15);
+						contentStream.showText("      -" + line);
+					}
+				}
+				
+				// end
+				contentStream.endText();
+				contentStream.close();
+
+				System.out.println(namePDF + "'s Resume was successfully created!");
+				// Save the PDF to a file
+				document.save(new File(namePDF + " Resume.pdf"));
+				document.close();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
+	public static void main(String[] args) {
+		launch(args);
+	}
+}
+
+
+
